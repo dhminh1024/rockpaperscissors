@@ -8,6 +8,13 @@ export const roundOutcome = {
   scissors: { rock: -1, paper: 1, scissors: 0 },
 };
 
+export const initialProps = {
+  choice: "unknown",
+  title: "",
+  win: 0,
+  score: 0,
+};
+
 export const useLocalStorageState = (
   key,
   defaultValue = "",

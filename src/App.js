@@ -5,16 +5,14 @@ import { Col, Container, Row, Button } from "react-bootstrap";
 import ChoiceButtons from "./components/ChoiceButtons";
 import ChoiceCard from "./components/ChoiceCard";
 import PublicNavbar from "./components/PublicNavbar";
-import { shapes, roundOutcome, useLocalStorageState } from "./utils";
+import {
+  shapes,
+  roundOutcome,
+  initialProps,
+  useLocalStorageState,
+} from "./utils";
 import Scores from "./components/Scores";
 import GameMode from "./components/GameMode";
-
-const initialProps = {
-  choice: "unknown",
-  title: "",
-  win: 0,
-  score: 0,
-};
 
 const App = () => {
   const [playerLeftProps, setPlayerLeftProps] = useLocalStorageState(
@@ -31,7 +29,7 @@ const App = () => {
     const result = roundOutcome[playerLeftChoice][playerRightChoice];
     setPlayerLeftProps({
       ...playerLeftProps,
-      choice: playerRightChoice,
+      choice: playerLeftChoice,
       win: result,
       score: result === 1 ? playerLeftProps.score + 1 : playerLeftProps.score,
     });
