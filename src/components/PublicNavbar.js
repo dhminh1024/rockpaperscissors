@@ -14,6 +14,7 @@ const PublicNavbar = () => {
         <a
           href="https://github.com/dhminh1024/rockpaperscissors"
           target="_blank"
+          rel="noreferrer"
         >
           <img src={githubIco} alt="Github" width="32px" />
         </a>
