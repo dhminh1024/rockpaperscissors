@@ -11,7 +11,10 @@ const PublicNavbar = () => {
       </Navbar.Brand>
       <Nav className="mr-auto"></Nav>
       <Nav>
-        <a href="#" target="_blank">
+        <a
+          href="https://github.com/dhminh1024/rockpaperscissors"
+          target="_blank"
+        >
           <img src={githubIco} alt="Github" width="32px" />
         </a>
       </Nav>

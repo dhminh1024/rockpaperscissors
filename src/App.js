@@ -1,29 +1,87 @@
-import React, { useState } from "react";
+import React from "react";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
-import { Col, Container, Row } from "react-bootstrap";
+import { Col, Container, Row, Button } from "react-bootstrap";
 import ChoiceButtons from "./components/ChoiceButtons";
 import ChoiceCard from "./components/ChoiceCard";
 import PublicNavbar from "./components/PublicNavbar";
-import { shapes, roundOutcome } from "./utils";
+import { shapes, roundOutcome, useLocalStorageState } from "./utils";
+import Scores from "./components/Scores";
+import GameMode from "./components/GameMode";
+
+const initialProps = {
+  choice: "unknown",
+  title: "",
+  win: 0,
+  score: 0,
+};
 
 const App = () => {
-  const [playerChoice, setPlayerChoice] = useState("");
-  const [playerWin, setPlayerWin] = useState(0);
-  const [playerScore, setPlayerScore] = useState(0);
-  const [computerChoice, setComputerChoice] = useState("");
-  const [computerWin, setComputerWin] = useState(0);
-  const [computerScore, setComputerScore] = useState(0);
+  const [playerLeftProps, setPlayerLeftProps] = useLocalStorageState(
+    "playerLeft",
+    initialProps
+  );
+  const [playerRightProps, setPlayerRightProps] = useLocalStorageState(
+    "playerRight",
+    initialProps
+  );
+  const [gameMode, setGameMode] = useLocalStorageState("gameMode", "");
 
-  const onPlayerChoose = (player) => {
-    const computer = shapes[Math.floor(Math.random() * 3)];
-    const result = roundOutcome[player][computer];
-    setPlayerChoice(player);
-    setComputerChoice(computer);
-    setPlayerWin(result);
-    setComputerWin(-result);
-    if (result === 1) setPlayerScore((currentScore) => currentScore + 1);
-    if (result === -1) setComputerScore((currentScore) => currentScore + 1);
+  const getRoundOutcome = (playerLeftChoice, playerRightChoice) => {
+    const result = roundOutcome[playerLeftChoice][playerRightChoice];
+    setPlayerLeftProps({
+      ...playerLeftProps,
+      choice: playerRightChoice,
+      win: result,
+      score: result === 1 ? playerLeftProps.score + 1 : playerLeftProps.score,
+    });
+    setPlayerRightProps({
+      ...playerRightProps,
+      choice: playerRightChoice,
+      win: -result,
+      score:
+        result === -1 ? playerRightProps.score + 1 : playerRightProps.score,
+    });
+  };
+
+  const onPlayerLeftChoose = (playerLeftChoice) => {
+    const playerRightChoice = shapes[Math.floor(Math.random() * 3)];
+    getRoundOutcome(playerLeftChoice, playerRightChoice);
+  };
+
+  const randomPlay = () => {
+    const playerLeftChoice = shapes[Math.floor(Math.random() * 3)];
+    const playerRightChoice = shapes[Math.floor(Math.random() * 3)];
+    getRoundOutcome(playerLeftChoice, playerRightChoice);
+  };
+
+  const onGameModeChoose = (mode) => {
+    if (mode === "onePlayer") {
+      setPlayerLeftProps({
+        ...playerLeftProps,
+        title: "You",
+      });
+      setPlayerRightProps({
+        ...playerRightProps,
+        title: "Computer",
+      });
+    } else if (mode === "twoPlayer") {
+      setPlayerLeftProps({
+        ...playerLeftProps,
+        title: "Player 1",
+      });
+      setPlayerRightProps({
+        ...playerRightProps,
+        title: "Player 2",
+      });
+    }
+    setGameMode(mode);
+  };
+
+  const restartGame = () => {
+    setPlayerLeftProps(initialProps);
+    setPlayerRightProps(initialProps);
+    setGameMode("");
   };
 
   return (
@@ -31,41 +89,52 @@ const App = () => {
       <PublicNavbar />
       <Container>
         <h1 className="text-center mt-5">Rock Paper Scissors</h1>
+        <Row>
+          <Col>
+            <GameMode
+              gameMode={gameMode}
+              onGameModeChoose={onGameModeChoose}
+              restartGame={restartGame}
+            />
+          </Col>
+        </Row>
         <Row className="justify-content-center align-items-start">
           <Col
             md={4}
             className="d-flex flex-column justify-content-center align-items-center"
           >
-            <ChoiceCard title="You" winner={playerWin} shape={playerChoice} />
-            <ChoiceButtons onPlayerChoose={onPlayerChoose} />
+            <ChoiceCard
+              title={playerLeftProps.title}
+              winner={playerLeftProps.win}
+              shape={playerLeftProps.choice}
+              side="left"
+            />
           </Col>
           <Col md={2} className="align-self-center">
-            <h2 className="text-center">
-              <span
-                className={
-                  `${playerScore > computerScore && "text-success"} ` +
-                  `${playerScore < computerScore && "text-danger"} `
-                }
-              >
-                {playerScore}
-              </span>{" "}
-              -{" "}
-              <span
-                className={
-                  `${playerScore < computerScore && "text-success"} ` +
-                  `${playerScore > computerScore && "text-danger"} `
-                }
-              >
-                {computerScore}
-              </span>
-            </h2>
+            <Scores
+              playerScore={playerLeftProps.score}
+              computerScore={playerRightProps.score}
+            />
           </Col>
           <Col md={4} className="d-flex flex-column justify-content-center">
             <ChoiceCard
-              title="Computer"
-              winner={computerWin}
-              shape={computerChoice}
+              title={playerRightProps.title}
+              winner={playerRightProps.win}
+              shape={playerRightProps.choice}
+              side="right"
             />
+          </Col>
+        </Row>
+        <Row>
+          <Col className="d-flex justify-content-center">
+            {gameMode === "twoPlayer" && (
+              <Button variant="primary" size="lg" onClick={randomPlay}>
+                Random Play
+              </Button>
+            )}
+            {gameMode === "onePlayer" && (
+              <ChoiceButtons onPlayerChoose={onPlayerLeftChoose} />
+            )}
           </Col>
         </Row>
       </Container>
